@@ -5,7 +5,7 @@ const port : number = 3000;
 type Discipline = {
 	name: string;
 	professor: string;
-	semestre?: number; (opcional)
+	semestre?: number;
 }
 
 interface Aluno{
