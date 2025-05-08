@@ -1,10 +1,13 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express, {Express, Request, Response} from "express";
 
 import { PrismaClient } from '../generated/prisma';
 
 const prisma = new PrismaClient()
 
-const port : number = 3000;
+const port : number = 3000; // localhost:3000
 
 type Discipline = {
 	name: string;
@@ -34,6 +37,7 @@ app.get("/", (req: Request, response: Response) => {
 });
 
 app.get("/api/users", async (req: Request, res: Response) => {
+	console.log("Rota /api/users foi chamada");
 	try {
 		const users = await prisma.user.findMany();
 		res.status(200).json({

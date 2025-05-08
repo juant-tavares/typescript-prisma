@@ -130,7 +130,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\aluno.laboratorio\\Desktop\\projeto\\typescript-prisma\\projeto\\generated\\prisma",
+      "value": "C:\\Users\\juan.lirio\\Desktop\\projeto2\\typescript-prisma\\projeto\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -144,7 +144,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\aluno.laboratorio\\Desktop\\projeto\\typescript-prisma\\projeto\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\juan.lirio\\Desktop\\projeto2\\typescript-prisma\\projeto\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
