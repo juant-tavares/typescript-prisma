@@ -1,41 +1,45 @@
-import dotenv from "dotenv";
-dotenv.config();
+import dotenv from "dotenv"
+dotenv.config()
 
-import express, { Express, Request, Response } from "express";
-import { PrismaClient } from '../generated/prisma';
+import express, { type Express, type Request, type Response } from "express"
+import cors from "cors"
+import { PrismaClient } from "../generated/prisma"
 
-import userRoutes from "./routes/userRoutes";
-import postRoutes from "./routes/postRoutes";
+import userRoutes from "./routes/userRoutes"
+import postRoutes from "./routes/postRoutes"
+import commentRoutes from "./routes/commentRoutes"
 
-const prisma = new PrismaClient();
-const port: number = 3000;
+const prisma = new PrismaClient()
+const port: number = 3000
 
 type Discipline = {
-  name: string;
-  professor: string;
-  semestre?: number;
-};
-
-interface Aluno {
-  name: string;
-  age: number;
-  disciplines: Array<Discipline>;
+  name: string
+  professor: string
+  semestre?: number
 }
 
-let aluno: Aluno = {
+interface Aluno {
+  name: string
+  age: number
+  disciplines: Array<Discipline>
+}
+
+const aluno: Aluno = {
   name: "Otávio",
   age: 40,
   disciplines: [],
-};
+}
 
-const app: Express = express();
-app.use(express.json());
+const app: Express = express()
+app.use(cors()) // Adicionando CORS para permitir requisições do frontend
+app.use(express.json())
 
-app.use("/api/users", userRoutes);
-app.use("/api/posts", postRoutes);
+app.use("/api/users", userRoutes)
+app.use("/api/posts", postRoutes)
+app.use("/api/comments", commentRoutes)
 
 app.get("/", (req: Request, res: Response) => {
-  res.json({ status: "OK" });
-});
+  res.json({ status: "OK" })
+})
 
-app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));
+app.listen(port, () => console.log(`Servidor rodando na porta ${port}`))
