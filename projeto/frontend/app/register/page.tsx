@@ -7,8 +7,6 @@ import { useRouter } from 'next/navigation';
 export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -16,21 +14,16 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (password !== confirmPassword) {
-      setError('As senhas não coincidem');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
+      // Versão simplificada sem senha
       const response = await fetch('http://localhost:3000/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email }),
       });
 
       if (!response.ok) {
@@ -38,7 +31,13 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Falha ao registrar usuário');
       }
 
-      router.push('/login?registered=true');
+      const userData = await response.json();
+      
+      // Salvar usuário no localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Redirecionar para o dashboard
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Ocorreu um erro ao registrar. Tente novamente.');
     } finally {
@@ -83,28 +82,7 @@ export default function RegisterPage() {
                 required
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="password" className="form-label">Senha</label>
-              <input
-                id="password"
-                type="password"
-                className="form-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="confirmPassword" className="form-label">Confirmar Senha</label>
-              <input
-                id="confirmPassword"
-                type="password"
-                className="form-input"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
+            {/* Removemos os campos de senha temporariamente */}
             <button
               type="submit"
               className="button button-primary"

@@ -1,4 +1,3 @@
-/* frontend/app/login/page.tsx */
 'use client';
 
 import { useState } from 'react';
@@ -7,7 +6,6 @@ import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -18,23 +16,22 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
+      // Versão simplificada: buscar usuário pelo email
+      const response = await fetch(`http://localhost:3000/api/users`);
+      
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Falha ao fazer login');
+        throw new Error('Falha ao buscar usuários');
       }
-
-      const userData = await response.json();
+      
+      const users = await response.json();
+      const user = users.find((u: any) => u.email === email);
+      
+      if (!user) {
+        throw new Error('Usuário não encontrado');
+      }
       
       // Salvar usuário no localStorage
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('user', JSON.stringify(user));
       
       // Redirecionar para o dashboard
       router.push('/dashboard');
@@ -50,7 +47,7 @@ export default function LoginPage() {
       <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
         <div className="card-header">
           <h1 className="card-title">Login</h1>
-          <p>Entre com seu email e senha para acessar sua conta</p>
+          <p>Entre com seu email para acessar sua conta</p>
         </div>
         <div className="card-content">
           {error && (
@@ -71,22 +68,7 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <div className="form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label htmlFor="password" className="form-label">Senha</label>
-                <Link href="/forgot-password" style={{ fontSize: '0.875rem', color: '#3b82f6', textDecoration: 'none' }}>
-                  Esqueceu a senha?
-                </Link>
-              </div>
-              <input
-                id="password"
-                type="password"
-                className="form-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            {/* Removemos o campo de senha temporariamente */}
             <button
               type="submit"
               className="button button-primary"
