@@ -225,3 +225,27 @@ body {
     justify-content: space-between;
   }
 }
+
+/* Animação para o dropdown */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Melhorias responsivas */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .header-content {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
