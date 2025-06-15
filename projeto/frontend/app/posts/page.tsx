@@ -9,19 +9,32 @@ interface Post {
   content?: string;
   published: boolean;
   authorId: number;
-  author?: {
-    id: number;
-    name: string;
-    email: string;
-  };
+  author?: { name: string };
   createdAt?: string;
 }
 
-export default function PostsPage() {
+interface User {
+  id: number;
+  email: string;
+  name: string;
+}
+
+export default function PublicPostsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    // Verificar se há um usuário logado
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        localStorage.removeItem('user');
+      }
+    }
+
     const fetchPosts = async () => {
       try {
         const response = await fetch('http://localhost:3000/api/posts');
@@ -41,98 +54,138 @@ export default function PostsPage() {
     fetchPosts();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    window.location.href = '/';
+  };
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Data desconhecida';
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   return (
-    <div>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+      {/* Header com navegação condicional */}
       <header className="header">
         <div className="container header-content">
           <Link href="/" className="logo">Blog App</Link>
-          <nav className="nav">
-            <Link href="/login" className="button button-outline">Login</Link>
-            <Link href="/register" className="button button-primary">Registrar</Link>
+          <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            {user ? (
+              // Se estiver logado, mostrar opções do usuário logado
+              <>
+                <span style={{ color: '#666' }}>Olá, {user.name}!</span>
+                <Link href="/dashboard" className="button button-outline">
+                  📊 Dashboard
+                </Link>
+                <Link href="/dashboard/posts/new" className="button button-primary">
+                  ➕ Novo Post
+                </Link>
+                <button onClick={handleLogout} className="button button-outline">
+                  🚪 Sair
+                </button>
+              </>
+            ) : (
+              // Se não estiver logado, mostrar opções de login/registro
+              <>
+                <Link href="/" className="button button-outline">🏠 Home</Link>
+                <Link href="/login" className="button button-outline">🔑 Login</Link>
+                <Link href="/register" className="button button-primary">📝 Registrar</Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
 
-      <div className="container" style={{ padding: '2rem 1rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Blog Posts</h1>
-          <p style={{ color: '#666', maxWidth: '600px', margin: '0 auto' }}>
-            Explore os posts mais recentes da nossa comunidade de escritores.
-          </p>
-        </div>
+      <main style={{ padding: '2rem 0' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>Posts do Blog</h1>
+            <p style={{ color: '#666', fontSize: '1.2rem' }}>
+              Explore os posts mais recentes da nossa comunidade de escritores.
+            </p>
+          </div>
 
-        {isLoading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="card">
-                <div className="card-header">
-                  <div style={{ height: '1.5rem', backgroundColor: '#f0f0f0', borderRadius: '4px', marginBottom: '0.5rem' }}></div>
-                  <div style={{ height: '1rem', backgroundColor: '#f0f0f0', borderRadius: '4px', width: '60%' }}></div>
+          {isLoading ? (
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <p>Carregando posts...</p>
+            </div>
+          ) : posts.length > 0 ? (
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
+              gap: '2rem' 
+            }}>
+              {posts.map((post) => (
+                <div key={post.id} className="card" style={{ height: 'fit-content' }}>
+                  <div className="card-header">
+                    <h2 className="card-title" style={{ 
+                      fontSize: '1.25rem',
+                      lineHeight: '1.4',
+                      marginBottom: '0.5rem'
+                    }}>
+                      {post.title}
+                    </h2>
+                    <p style={{ color: '#666', fontSize: '0.875rem', margin: 0 }}>
+                      por {post.author?.name || 'Autor desconhecido'}
+                    </p>
+                  </div>
+                  <div className="card-content">
+                    <p style={{ 
+                      color: '#666', 
+                      lineHeight: '1.6',
+                      marginBottom: '1rem'
+                    }}>
+                      {post.content 
+                        ? post.content.length > 150 
+                          ? post.content.substring(0, 150) + '...' 
+                          : post.content
+                        : 'Sem conteúdo'
+                      }
+                    </p>
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center' 
+                    }}>
+                      <p style={{ 
+                        fontSize: '0.875rem', 
+                        color: '#666', 
+                        margin: 0 
+                      }}>
+                        {formatDate(post.createdAt)}
+                      </p>
+                      <Link 
+                        href={`/posts/${post.id}`} 
+                        className="button button-outline"
+                        style={{ fontSize: '0.875rem' }}
+                      >
+                        Ler mais →
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-                <div className="card-content">
-                  <div style={{ height: '4rem', backgroundColor: '#f0f0f0', borderRadius: '4px' }}></div>
-                </div>
-                <div className="card-footer">
-                  <div style={{ height: '1rem', backgroundColor: '#f0f0f0', borderRadius: '4px', width: '40%' }}></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : posts.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            {posts.map((post) => (
-              <div key={post.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-                <div className="card-header">
-                  <h3 className="card-title" style={{ 
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis', 
-                    display: '-webkit-box', 
-                    WebkitLineClamp: 2, 
-                    WebkitBoxOrient: 'vertical' 
-                  }}>
-                    {post.title}
-                  </h3>
-                  <p style={{ color: '#666', fontSize: '0.875rem', margin: '0.5rem 0 0 0' }}>
-                    por {post.author?.name || 'Autor desconhecido'}
-                  </p>
-                </div>
-                <div className="card-content" style={{ flex: 1 }}>
-                  <p style={{ 
-                    color: '#666', 
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis', 
-                    display: '-webkit-box', 
-                    WebkitLineClamp: 3, 
-                    WebkitBoxOrient: 'vertical' 
-                  }}>
-                    {post.content || 'Sem conteúdo'}
-                  </p>
-                </div>
-                <div className="card-footer">
-                  <p style={{ fontSize: '0.875rem', color: '#666', margin: 0 }}>
-                    {formatDate(post.createdAt)}
-                  </p>
-                  <Link href={`/posts/${post.id}`} className="button button-outline">
-                    Ler mais
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '3rem 0' }}>
-            <p style={{ color: '#666', marginBottom: '1rem' }}>Nenhum post publicado ainda.</p>
-            <Link href="/login" className="button button-primary">
-              Faça login para criar um post
-            </Link>
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '3rem' }}>
+              <p style={{ marginBottom: '1rem', color: '#666', fontSize: '1.1rem' }}>
+                Nenhum post publicado ainda.
+              </p>
+              {user ? (
+                <Link href="/dashboard/posts/new" className="button button-primary">
+                  Criar seu primeiro post
+                </Link>
+              ) : (
+                <Link href="/login" className="button button-primary">
+                  Faça login para criar um post
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
