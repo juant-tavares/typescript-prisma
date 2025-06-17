@@ -28,37 +28,41 @@ export function useAuth(): AuthContextType {
           return
         }
 
-        console.log("🔍 Verificando autenticação...")
+        console.log("🔍 useAuth: Verificando autenticação...")
+
+        // Aguardar um pouco para garantir que o DOM esteja pronto
+        await new Promise((resolve) => setTimeout(resolve, 50))
 
         const savedUser = localStorage.getItem("user")
-        console.log("📦 Dados salvos:", savedUser)
+        console.log("📦 useAuth: Dados salvos:", !!savedUser)
 
         if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
           try {
             const userData = JSON.parse(savedUser)
-            console.log("👤 Dados do usuário:", userData)
+            console.log("👤 useAuth: Dados do usuário:", userData.name)
 
             if (userData && userData.id && userData.email) {
               setUser(userData)
-              console.log("✅ Usuário autenticado:", userData.name)
+              console.log("✅ useAuth: Usuário autenticado:", userData.name)
             } else {
-              console.log("❌ Dados inválidos, limpando...")
+              console.log("❌ useAuth: Dados inválidos, limpando...")
               localStorage.removeItem("user")
               router.push("/login")
             }
           } catch (parseError) {
-            console.error("❌ Erro ao fazer parse:", parseError)
+            console.error("❌ useAuth: Erro ao fazer parse:", parseError)
             localStorage.removeItem("user")
             router.push("/login")
           }
         } else {
-          console.log("❌ Nenhum usuário encontrado, redirecionando...")
+          console.log("❌ useAuth: Nenhum usuário encontrado, redirecionando...")
           router.push("/login")
         }
       } catch (error) {
-        console.error("❌ Erro na inicialização:", error)
+        console.error("❌ useAuth: Erro na inicialização:", error)
         router.push("/login")
       } finally {
+        console.log("✅ useAuth: Inicialização concluída")
         setIsLoading(false)
       }
     }

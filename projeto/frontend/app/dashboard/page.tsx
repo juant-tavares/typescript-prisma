@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useAuth } from "@/contexts/auth-context"
-import { API_URL } from "@/lib/config"
+import { useAuth } from "@/components/auth-guard"
 
 interface Post {
   id: number
@@ -22,42 +21,68 @@ interface User {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const [posts, setPosts] = useState<Post[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const [postsRes, usersRes] = await Promise.all([fetch(`${API_URL}/api/posts`), fetch(`${API_URL}/api/users`)])
+      // Só buscar dados se não estiver carregando autenticação e tiver usuário
+      if (!authLoading && user) {
+        try {
+          console.log("🔄 Buscando dados do dashboard...")
 
-        if (postsRes.ok && usersRes.ok) {
-          const postsData = await postsRes.json()
-          const usersData = await usersRes.json()
+          const [postsRes, usersRes] = await Promise.all([
+            fetch(`http://localhost:3000/api/posts`),
+            fetch(`http://localhost:3000/api/users`),
+          ])
 
-          setPosts(postsData)
-          setUsers(usersData)
+          if (postsRes.ok && usersRes.ok) {
+            const postsData = await postsRes.json()
+            const usersData = await usersRes.json()
+
+            console.log("✅ Dados carregados:", { posts: postsData.length, users: usersData.length })
+
+            setPosts(postsData)
+            setUsers(usersData)
+          }
+        } catch (error) {
+          console.error("❌ Erro ao buscar dados:", error)
+        } finally {
+          setIsLoading(false)
         }
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error)
-      } finally {
+      } else if (!authLoading && !user) {
+        // Se não está carregando auth mas não há usuário, parar loading
         setIsLoading(false)
       }
     }
 
     fetchData()
-  }, [])
+  }, [user, authLoading])
 
   // Filtrar posts do usuário atual
   const userPosts = posts.filter((post) => post.authorId === user?.id)
   const publishedPosts = posts.filter((post) => post.published)
 
+  // Se ainda está verificando autenticação, mostrar loading
+  if (authLoading) {
+    return (
+      <div style={{ textAlign: "center", padding: "3rem" }}>
+        <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⏳</div>
+        <h2 style={{ marginBottom: "1rem" }}>Carregando...</h2>
+        <p>Verificando autenticação...</p>
+      </div>
+    )
+  }
+
+  // Se não há usuário (não deveria acontecer por causa do AuthGuard)
   if (!user) {
     return (
       <div style={{ textAlign: "center", padding: "3rem" }}>
-        <h2 style={{ marginBottom: "1rem" }}>Carregando...</h2>
-        <p>Verificando autenticação...</p>
+        <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>❌</div>
+        <h2 style={{ marginBottom: "1rem" }}>Erro de autenticação</h2>
+        <p>Usuário não encontrado. Redirecionando...</p>
       </div>
     )
   }

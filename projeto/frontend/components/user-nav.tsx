@@ -3,10 +3,10 @@
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/contexts/auth-context"
+import { useAuth } from "@/components/auth-guard"
 
 export function UserNav() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const router = useRouter()
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -29,7 +29,8 @@ export function UserNav() {
   }, [showProfileMenu])
 
   const handleLogout = () => {
-    logout()
+    console.log("🚪 Fazendo logout...")
+    localStorage.removeItem("user")
     setShowProfileMenu(false)
     router.push("/")
   }
@@ -140,6 +141,25 @@ export function UserNav() {
               onClick={() => setShowProfileMenu(false)}
             >
               📝 Meus Posts
+            </Link>
+
+            <Link
+              href="/dashboard/settings"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.5rem 1rem",
+                textDecoration: "none",
+                color: "#374151",
+                fontSize: "0.875rem",
+                transition: "background-color 0.15s ease",
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#f3f4f6")}
+              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+              onClick={() => setShowProfileMenu(false)}
+            >
+              ⚙️ Configurações
             </Link>
 
             <Link
