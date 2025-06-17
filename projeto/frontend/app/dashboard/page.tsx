@@ -126,7 +126,7 @@ export default function DashboardPage() {
                 <p style={{ fontSize: "2.5rem", fontWeight: "bold", margin: "0.5rem 0", color: "#1f2937" }}>
                   {isLoading ? "..." : userPosts.length}
                 </p>
-                <p style={{ fontSize: "0.75rem", color: "#6b7280", margin: 0 }}>Suas publicações</p>
+                <p style={{ fontSize: "0.75rem", color: "#6b7280", margin: 0 }}>Publicados e em rascunho</p>
               </div>
               <div style={{ fontSize: "3rem", opacity: 0.6 }}>✍️</div>
             </div>
