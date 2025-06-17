@@ -24,14 +24,17 @@ export default function LoginPage() {
       const response = await fetch(`http://localhost:3000/api/users`)
 
       if (!response.ok) {
-        throw new Error("Falha ao buscar usuários")
+        setError("Falha ao buscar usuários")
+        return
       }
 
       const users = await response.json()
       const user = users.find((u: any) => u.email === email)
 
       if (!user) {
-        throw new Error("Usuário não encontrado")
+        console.log("❌ Usuário não encontrado para email:", email)
+        setError("Usuário não encontrado")
+        return
       }
 
       console.log("✅ Usuário encontrado:", user.name)
@@ -49,7 +52,7 @@ export default function LoginPage() {
       }, 100)
     } catch (err: any) {
       console.error("❌ Erro de login:", err)
-      setError(err.message || "Falha ao fazer login. Verifique suas credenciais.")
+      setError("Falha ao fazer login. Verifique suas credenciais.")
     } finally {
       setIsLoading(false)
     }
