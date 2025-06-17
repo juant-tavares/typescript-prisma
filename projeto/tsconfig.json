@@ -1,12 +1,18 @@
 {
   "compilerOptions": {
-    "target": "es2016",
+    "target": "es2020",
     "module": "commonjs",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
     "strict": false,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "rootDir": "./src/",
-    "outDir": "./build"
-  }
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "build", "frontend/**/*", "generated/**/*", "prisma/**/*", "scripts/**/*"]
 }
