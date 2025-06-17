@@ -3,12 +3,13 @@
 import type React from "react"
 import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/contexts/auth-context"
+import { useAuth } from "@/components/auth-guard"
 import { API_URL } from "@/lib/config"
 import type { Post } from "@/types"
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
+  const { user, isLoading: authLoading } = useAuth()
   const [post, setPost] = useState<Post | null>(null)
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
@@ -18,25 +19,33 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [isLoading, setIsLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(true)
   const router = useRouter()
-  const { user } = useAuth()
   const postId = Number.parseInt(resolvedParams.id)
 
   useEffect(() => {
     const fetchPost = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/posts/${postId}`)
-        if (response.ok) {
-          const data = await response.json()
-          setPost(data)
-          setTitle(data.title)
-          setContent(data.content || "")
-          setPublished(data.published)
-        } else {
-          setError("Post não encontrado")
+      // Só buscar o post se não estiver carregando autenticação e tiver usuário
+      if (!authLoading && user) {
+        try {
+          console.log("🔍 Buscando post para edição:", postId)
+          const response = await fetch(`${API_URL}/api/posts/${postId}`)
+          if (response.ok) {
+            const data = await response.json()
+            console.log("📝 Post carregado:", data.title)
+            setPost(data)
+            setTitle(data.title)
+            setContent(data.content || "")
+            setPublished(data.published)
+          } else {
+            setError("Post não encontrado")
+          }
+        } catch (err) {
+          console.error("❌ Erro ao carregar post:", err)
+          setError("Erro ao carregar o post")
+        } finally {
+          setIsFetching(false)
         }
-      } catch (err) {
-        setError("Erro ao carregar o post")
-      } finally {
+      } else if (!authLoading && !user) {
+        // Se não está carregando auth mas não há usuário, parar loading
         setIsFetching(false)
       }
     }
@@ -44,7 +53,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     if (postId) {
       fetchPost()
     }
-  }, [postId])
+  }, [postId, user, authLoading])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,6 +79,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     setIsLoading(true)
 
     try {
+      console.log("💾 Atualizando post:", postId)
       const response = await fetch(`${API_URL}/api/posts/${postId}`, {
         method: "PUT",
         headers: {
@@ -87,6 +97,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         throw new Error(data.error || "Falha ao atualizar post")
       }
 
+      console.log("✅ Post atualizado com sucesso")
       setSuccess("Post atualizado com sucesso!")
 
       // Redirecionar após um breve delay para mostrar a mensagem de sucesso
@@ -94,10 +105,36 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         router.push("/dashboard/posts")
       }, 1500)
     } catch (err: any) {
+      console.error("❌ Erro ao atualizar post:", err)
       setError(err.message || "Ocorreu um erro ao atualizar o post. Tente novamente.")
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Mostrar loading durante verificação de auth
+  if (authLoading) {
+    return (
+      <div style={{ textAlign: "center", padding: "3rem" }}>
+        <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⏳</div>
+        <h2 style={{ marginBottom: "1rem" }}>Carregando...</h2>
+        <p>Verificando autenticação...</p>
+      </div>
+    )
+  }
+
+  // Se não há usuário, mostrar erro
+  if (!user) {
+    return (
+      <div style={{ textAlign: "center", padding: "3rem" }}>
+        <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>❌</div>
+        <h2 style={{ marginBottom: "1rem" }}>Erro de autenticação</h2>
+        <p style={{ marginBottom: "2rem" }}>Você precisa estar logado para editar posts.</p>
+        <button onClick={() => router.push("/login")} className="button button-primary">
+          Fazer Login
+        </button>
+      </div>
+    )
   }
 
   if (isFetching) {
@@ -225,7 +262,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                     <strong>ID:</strong> #{post.id}
                   </p>
                   <p style={{ margin: "0.25rem 0" }}>
-                    <strong>Autor:</strong> {post.author?.name || "Desconhecido"}
+                    <strong>Autor:</strong> {post.author?.name || user.name}
                   </p>
                   <p style={{ margin: "0.25rem 0" }}>
                     <strong>Criado em:</strong>{" "}
