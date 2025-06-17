@@ -70,7 +70,6 @@ export default function PublicPostsPage() {
       {/* Header com navegação condicional */}
       <header className="header">
         <div className="container header-content">
-          <Link href="/" className="logo">Blog App</Link>
           <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             {user ? (
               // Se estiver logado, mostrar opções do usuário logado

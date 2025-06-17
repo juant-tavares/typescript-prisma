@@ -143,25 +143,6 @@ export function UserNav() {
             </Link>
 
             <Link
-              href="/dashboard/settings"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.5rem 1rem",
-                textDecoration: "none",
-                color: "#374151",
-                fontSize: "0.875rem",
-                transition: "background-color 0.15s ease",
-              }}
-              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#f3f4f6")}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-              onClick={() => setShowProfileMenu(false)}
-            >
-              ⚙️ Configurações
-            </Link>
-
-            <Link
               href="/posts"
               style={{
                 display: "flex",

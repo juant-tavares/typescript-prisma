@@ -340,9 +340,9 @@ export default function Home() {
                     padding: '1rem',
                     fontSize: '2rem'
                   }}>
-                    💬
+                    👁️
                   </div>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Comente</h3>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Veja os posts da comunidade</h3>
                   <p style={{ color: '#64748b', margin: 0, textAlign: 'center' }}>
                     Interaja com outros escritores.
                   </p>
